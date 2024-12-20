@@ -29,7 +29,7 @@ var (
 )
 
 // DefaultClient type to use. No reason to change but you could if you wanted to.
-var DefaultClient = AndroidClient
+var DefaultClient = IOSClient
 
 // Client offers methods to download video metadata and video streams.
 type Client struct {
@@ -159,6 +159,7 @@ type innertubeClient struct {
 	UserAgent         string `json:"userAgent,omitempty"`
 	TimeZone          string `json:"timeZone"`
 	UTCOffset         int    `json:"utcOffsetMinutes"`
+	DeviceModel       string `json:"deviceModel,omitempty"`
 }
 
 // client info for the innertube API
@@ -168,6 +169,7 @@ type clientInfo struct {
 	version        string
 	userAgent      string
 	androidVersion int
+	deviceModel    string
 }
 
 var (
@@ -188,6 +190,15 @@ var (
 		androidVersion: 30,
 	}
 
+	// IOSClient Client based brrrr.
+	IOSClient = clientInfo{
+		name:        "IOS",
+		version:     "19.45.4",
+		key:         "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8",
+		userAgent:   "com.google.ios.youtube/19.45.4 (iPhone16,2; U; CPU iOS 18_1_0 like Mac OS X;)",
+		deviceModel: "iPhone16,2",
+	}
+
 	// EmbeddedClient, not really tested.
 	EmbeddedClient = clientInfo{
 		name:      "WEB_EMBEDDED_PLAYER",
@@ -203,7 +214,7 @@ func (c *Client) videoDataByInnertube(ctx context.Context, id string) ([]byte, e
 		Context:        prepareInnertubeContext(*c.client),
 		ContentCheckOK: true,
 		RacyCheckOk:    true,
-		Params:         playerParams,
+		// Params:         playerParams,
 		PlaybackContext: &playbackContext{
 			ContentPlaybackContext: contentPlaybackContext{
 				// SignatureTimestamp: sts,
@@ -230,6 +241,7 @@ func prepareInnertubeContext(clientInfo clientInfo) inntertubeContext {
 			HL:                "en",
 			GL:                "US",
 			TimeZone:          "UTC",
+			DeviceModel:       clientInfo.deviceModel,
 			ClientName:        clientInfo.name,
 			ClientVersion:     clientInfo.version,
 			AndroidSDKVersion: clientInfo.androidVersion,
